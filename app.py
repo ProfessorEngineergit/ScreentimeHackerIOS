@@ -165,7 +165,6 @@ def upload_file():
 
 if __name__ == '__main__':
     # Use debug=False in production to prevent security vulnerabilities
-    # Set debug=True only for development
-    import os
-    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
+    # Set debug=True only for development via FLASK_DEBUG environment variable
+    is_debug_enabled = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=is_debug_enabled, host='0.0.0.0', port=5000)
