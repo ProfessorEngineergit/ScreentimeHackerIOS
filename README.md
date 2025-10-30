@@ -35,6 +35,17 @@ pip install -r requirements.txt
 ```
 
 3. **Anwendung starten:**
+
+**Option A - Mit Convenience Script (empfohlen):**
+```bash
+# Für Linux/Mac:
+./run.sh
+
+# Für Windows:
+run.bat
+```
+
+**Option B - Manuell:**
 ```bash
 python app.py
 ```
