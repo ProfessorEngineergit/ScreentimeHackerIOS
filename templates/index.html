@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenTime Hacker iOS - Bildschirmzeitcode Extraktor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .info-box p, .info-box ul {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragging {
+            background: #e8edff;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .passcode {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .selected-file {
+            display: none;
+            margin-top: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔓 ScreenTime Hacker iOS</h1>
+        <p class="subtitle">Bildschirmzeitcode Extraktor für Bildungszwecke</p>
+
+        <div class="info-box">
+            <h3>📱 Anleitung:</h3>
+            <ul>
+                <li>Erstellen Sie ein iTunes/Finder Backup Ihres iPhones (unverschlüsselt)</li>
+                <li>Navigieren Sie zum Backup-Ordner</li>
+                <li>Suchen Sie nach Dateien mit Namen wie "39...plist" oder ähnlich</li>
+                <li>Laden Sie die Datei hoch, die Bildschirmzeit-Daten enthält</li>
+            </ul>
+        </div>
+
+        <form id="uploadForm">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Klicken zum Auswählen oder Datei hierher ziehen</div>
+                <div class="upload-hint">Unterstützte Formate: .plist, .log, .db, .sqlite</div>
+                <div class="selected-file" id="selectedFile"></div>
+            </div>
+            <input type="file" id="fileInput" accept=".plist,.log,.db,.sqlite">
+            <button type="submit" class="btn" id="submitBtn">Code extrahieren</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Analysiere Datei und extrahiere Code...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="warning">
+            ⚠️ <strong>Hinweis:</strong> Dieses Tool dient ausschließlich Bildungszwecken. 
+            Verwenden Sie es nur für Ihre eigenen Geräte oder mit ausdrücklicher Erlaubnis.
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const selectedFile = document.getElementById('selectedFile');
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                selectedFile.textContent = `Ausgewählt: ${fileName}`;
+                selectedFile.style.display = 'block';
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragging');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragging');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragging');
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                const fileName = e.dataTransfer.files[0].name;
+                selectedFile.textContent = `Ausgewählt: ${fileName}`;
+                selectedFile.style.display = 'block';
+            }
+        });
+
+        // Form submission
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (fileInput.files.length === 0) {
+                showResult(false, 'Bitte wählen Sie eine Datei aus.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult(true, data.message, data.passcode);
+                } else {
+                    showResult(false, data.error);
+                }
+            } catch (error) {
+                showResult(false, 'Fehler beim Hochladen der Datei. Bitte versuchen Sie es erneut.');
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        function showResult(success, message, passcode = null) {
+            result.className = 'result ' + (success ? 'success' : 'error');
+            
+            let html = `<div class="result-title">${success ? '✅ Erfolg!' : '❌ Fehler'}</div>`;
+            html += `<p>${message}</p>`;
+            
+            if (passcode) {
+                html += `<div class="passcode">${passcode}</div>`;
+                html += `<p style="text-align: center; margin-top: 10px;">Ihr Bildschirmzeitcode lautet: <strong>${passcode}</strong></p>`;
+            }
+            
+            result.innerHTML = html;
+            result.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
