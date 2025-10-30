@@ -76,10 +76,10 @@ def extract_screentime_code(file_path):
                 'error': 'No screen time passcode data found in this file. Please upload the correct backup file (usually named com.apple.springboard.plist or similar).'
             }
             
-    except Exception as e:
+    except Exception:
         return {
             'success': False,
-            'error': f'Error processing file: {str(e)}'
+            'error': 'Error processing file. Please ensure you have uploaded a valid backup file.'
         }
 
 
@@ -164,4 +164,8 @@ def upload_file():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use debug=False in production to prevent security vulnerabilities
+    # Set debug=True only for development
+    import os
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
